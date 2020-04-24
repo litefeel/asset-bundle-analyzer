@@ -164,13 +164,27 @@ class Parser(object):
             title = lines[0]
             lines[0] = ""
             match = regex.match(title)
-            self._parse_lines(lines)
-            objects[int(match.group(1))] = {"ClassID": int(match.group(2)), "Type": match.group(3), "Content": self._parse_obj()}
+            objtype = match.group(3)
+            if objtype == "TextAsset":
+                self._parse_text_asset(lines)
+            else:
+                self._parse_lines(lines)
+            objects[int(match.group(1))] = {"ClassID": int(match.group(2)), "Type": objtype, "Content": self._parse_obj()}
         except Exception as e:
             print("Error in " + title)
             self._print_error()
             raise
     
+    def _parse_text_asset(self, lines):
+        self._index = 0
+        self._fields = []
+        line = "\r\n".join(lines[1:]).rstrip()
+        field = self._parse_line(line)
+        # If it was a field, add it to the list.
+        if field:
+            self._fields.append(field)
+
+
     def _parse_lines(self, lines):
         self._index = 0
         self._fields = []
